@@ -16,8 +16,8 @@ getdump() {
   local l_host="$1"
   local l_disk="$2"
   local l_target="$3"
-  echo "getting local disk dump of $l_disk from $l_host"
-  sudo fdisk -l  | egrep "^/dev/$l_disk"
+  echo "getting remote disk dump of $l_disk from $l_host"
+  ssh $l_host sudo fdisk -l  | egrep "^/dev/$l_disk"
   if [ $? -ne 0 ]
   then
     echo "device $l_disk does not exist on host $l_host" 1>&2
