@@ -12,23 +12,10 @@
 #  3: target e.g. image.gz
 #
 getdump() {
-  local l_host="$1"
-  local l_disk="$2"
-  local l_target="$3"
-  echo "getting local disk dump of $l_disk from $l_host"
-  sudo fdisk -l  | egrep "^/dev/$l_disk"
-  if [ $? -ne 0 ]
-  then
-    echo "device $l_disk does not exist on host $l_host" 1>&2
-    exit 1
-  else
-    if [ ! -f $l_target ]
-    then
-      sudo dd if=/dev/$disk bs=1M | gzip -1 - | pv | dd of=$l_target
-    else
-      echo "$l_target already exists"
-    fi
-  fi
+  local l_disk="$1"
+  local l_target="$2"
+  echo "getting local disk dump of $l_disk from $l_disk"
+  sudo dd if="${l_disk}" bs=1M | gzip -1 - | pv | dd of=$l_target
 }
 
 #
@@ -82,14 +69,13 @@ usage() {
 }
 
 # check arguments
-if [ $# -lt 2 ]
+if [ $# -lt 1 ]
 then
   usage
 fi
 
 # get the command line parameters
-host="$1"
-disk="$2"
+disk="$1"
 
 # calculate the names of the image files
 ts=`date "+%Y-%m-%d"`
@@ -97,9 +83,10 @@ ts=`date "+%Y-%m-%d"`
 #   .gz the zipped dd
 #   .dd the disk dump file
 #   .vmware - the vmware disk file
-image="${host}_${disk}_image_$ts"
+tmp_name=$(echo $1 | grep -Po '[^\/]*$')
+image="./${tmp_name}.image_$ts"
 
-echo "$0 $host/$disk ->  $image"
+echo "$0 $disk ->  $image"
 
 # first check/install necessary packages
 opt_install qemu-img qemu-utils
@@ -109,7 +96,7 @@ opt_install pv pv
 #  we don't want to start this tedious process twice if avoidable
 if [ ! -f $image.gz ]
 then
-  getdump $host $disk $image.gz
+  getdump $disk $image.gz
 else
   echo "$image.gz already downloaded"
 fi
