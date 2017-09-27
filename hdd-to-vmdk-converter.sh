@@ -11,7 +11,6 @@
 #  2: disk e.g. sda
 #  3: target e.g. image.gz
 #
-# http://unix.stackexchange.com/questions/132797/how-to-use-ssh-to-make-a-dd-copy-of-disk-a-from-host-b-and-save-on-disk-b
 getdump() {
   local l_host="$1"
   local l_disk="$2"
@@ -25,7 +24,7 @@ getdump() {
   else
     if [ ! -f $l_target ]
     then
-      ssh $l_host "sudo dd if=/dev/$disk bs=1M | gzip -1 -" | pv | dd of=$l_target
+      sudo dd if=/dev/$disk bs=1M | gzip -1 - | pv | dd of=$l_target
     else
       echo "$l_target already exists"
     fi
@@ -69,7 +68,7 @@ vmware_convert() {
 usage() {
   echo "usage: $0 host device"
   echo "      host: the host to get the disk dump from e.g. frodo.lotr.org"
-  echo "            you need ssh and sudo privileges on that host"
+  echo "            you need sudo privileges on that host"
   echo "
   echo "    device: the disk to dump from e.g. sda"
   echo ""
